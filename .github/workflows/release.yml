@@ -1,6 +1,5 @@
 on:
   workflow_run:
-    workflows: ["tests"]
     branches: [ main ]
     types:
       - completed
@@ -43,10 +42,10 @@ jobs:
 
       - name: Build, tag, and push the image to Amazon ECR
         id: build-image
-#        env:
+        env:
 #          ECR_REGISTRY: public.ecr.aws/strongdm
 #          ECR_REPOSITORY: log-export-container
-#          IMAGE_TAG: ${{ steps.version.outputs.new_tag }}
+          IMAGE_TAG: ${{ steps.version.outputs.new_tag }}
         run: |
           # Adding version
           echo _version_=\"$IMAGE_TAG\" > fluentd/_version.rb

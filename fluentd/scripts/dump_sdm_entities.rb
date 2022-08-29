@@ -46,8 +46,8 @@ def extract_activities_interval
 end
 
 def stream_activities
-  stdout, thread = open_activities_stream
-  process_activity_stream(stdout)
+  stdout_and_stderr, thread = open_activities_stream
+  process_activity_stream(stdout_and_stderr)
   Process.kill(SIGTERM, thread.pid)
 end
 
@@ -57,8 +57,8 @@ def open_activities_stream
   if must_stream_json
     command += " -j"
   end
-  _, out, _, thread = Open3.popen3(command)
-  [out, thread]
+  _, stdout_and_stderr, thread = Open3.popen2e(command)
+  [stdout_and_stderr, thread]
 end
 
 def send_socket_message(message)
@@ -75,7 +75,7 @@ end
 
 def process_activity_stream(stdout)
   must_stream_json = ENV['LOG_EXPORT_CONTAINER_INPUT'].include?("json")
-  while (line = stdout.readline)
+  stdout.each do |line|
     if must_stream_json
       message = JSON.generate(parse_entity(line, 'activities'))
     else
@@ -101,12 +101,17 @@ def dump_entities(entity_name)
   unless AUDIT_ENTITY_TYPES.keys.include?(entity_name.to_s)
     return
   end
-  rows = get_audit_rows(entity_name)
-  unless rows
-    return
+  begin
+    rows = get_audit_rows(entity_name)
+    unless rows
+      return
+    end
+    parsed_rows = parse_rows(rows, entity_name)
+    print_rows(parsed_rows)
+  rescue StandardError => _e
+    error = {"error" => "An error ocurred while extracting the audit #{entity_name.to_s} data: #{_e}", "type" => "unclass"}
+    send_socket_message(JSON.generate(error))
   end
-  parsed_rows = parse_rows(rows, entity_name)
-  print_rows(parsed_rows)
 end
 
 dump_entities(ARGV[0])

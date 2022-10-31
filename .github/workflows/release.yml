@@ -61,7 +61,7 @@ jobs:
          LEC_VERSION: ${{ steps.version.outputs.new_tag }}
          RUBYGEMS_API_KEY: ${{ secrets.RUBYGEMS_API_KEY }}
         run: |
-          touch ~/.gem/credentials
+          mkdir ~/.gem
           echo ":api-key: ${RUBYGEMS_API_KEY}" > ~/.gem/credentials
           gem build .gemspec
           gem push ./log-export-container-${LEC_VERSION}.gem --key api-key

@@ -1,6 +1,9 @@
 on:
-  push:
+  workflow_run:
+    workflows: ["tests"]
     branches: [ main ]
+    types:
+      - completed
   workflow_dispatch:
 
 name: main-release

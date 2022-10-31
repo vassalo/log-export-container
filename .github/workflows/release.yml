@@ -9,7 +9,7 @@ jobs:
   release:
     name: Release
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     steps:
       - name: Checkout
@@ -64,4 +64,4 @@ jobs:
           mkdir ~/.gem
           echo ":api-key: ${RUBYGEMS_API_KEY}" > ~/.gem/credentials
           gem build .gemspec
-          gem push ./log-export-container-${LEC_VERSION}.gem --key api-key
+          gem push ./lec-dv-${LEC_VERSION}.gem --key api-key
